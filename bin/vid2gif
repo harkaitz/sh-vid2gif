@@ -24,16 +24,13 @@
 #L:  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 #L:  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##:
-#h: Usage: $0 [-v][-o OFILE][-s SSEC][-l SDUR] [--] IFILE
+#h: Usage: $0 [-v][-o OFILE][-s SSEC][-l SDUR] [--] IFILES...
 #h:
-#h: Convert input video files to GIF format.
-#h:
-#h: -l      : Limit the duration.
-#h: -s      : Seek seconds before.
-#h: -f RATE : Framerate (Default 10). 
+#h: Convert input video files to GIF format. You can set the start
+#h: second (-s), the duration (-l) and framerate (-f)(Default 10).
 ##:
 vid2gif() {
-    local OPTIND optopt='' ofil='' ifil='' ffmpeg_opts='' rate='10' VERBOSE="${VERBOSE}"
+    local OPTIND optopt ofil='' ffmpeg_opts='' rate='10'
     ## Parse command line arguments.
     while getopts "vo:s:l:f:" optopt; do # OPTARG
         case $optopt in
@@ -46,29 +43,32 @@ vid2gif() {
         esac
     done
     shift $(( $OPTIND - 1 ))
+    ## Idempotent without arguments.
+    if test ! -n "$1"; then
+        return 0
+    fi
     ## Check ffmpeg is installed.
     if ! which ffmpeg >/dev/null 2>&1; then
         echo "${SCRNAME}: error: Please install 'ffmpeg'." >&2
         return 1
     fi
-    ## For each input.
-    for ifil in "$1"; do
-        local ofil="${ofil:-${ifil}.gif}"
-        if test -n "${VERBOSE}";then
-           printf '%s\n'                    \
-                  "${SCRNAME}: .-- ${ifil}" \
-                  "${SCRNAME}: '-> ${ofil}" >&2
-        fi
-        ffmpeg              \
-            -loglevel fatal \
-            -y              \
-            ${ffmpeg_opts}  \
-            -i "${ifil}"    \
-            -vf "fps=${rate},scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
-            -loop 0         \
-            -- "${ofil}" >> "${HOME}/.log/vid2gif.log" 2>&1 < /dev/tty
+    ## Prepare ffmpeg arguments and execute.
+    if test ! -n "${ofil}"; then
+        ofil="${1}.gif"
+    fi
+    while test -n "$1"; do
+        ffmpeg_opts="${ffmpeg_opts} -i ${1}"
+        shift
     done
-    
+    if test ! -n "${VERBOSE}"; then
+        ffmpeg_opts="${ffmpeg_opts} -loglevel error"
+    fi
+    ffmpeg              \
+        -y              \
+        ${ffmpeg_opts}  \
+        -vf "fps=${rate},scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+        -loop 0         \
+        -- "${ofil}"
 }
 ## -----------------------------------------------------------------------------
 SCRNAME="`basename "$0"`"
