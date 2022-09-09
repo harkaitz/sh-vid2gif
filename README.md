@@ -12,15 +12,18 @@ Convert videos to gifs.
 
 ## Help
 
+img2gif
+
+    Usage: img2gif [-v][-o OFILE][-T PERIOD] [--] IFILES...
+    
+    Join images into a single GIF using ImageMagick(1).
+
 vid2gif
 
-    Usage: vid2gif [-v][-o OFILE][-s SSEC][-l SDUR] [--] IFILE
+    Usage: vid2gif [-v][-o OFILE][-s SSEC][-l SDUR] [--] IFILES...
     
-    Convert input video files to GIF format.
-    
-    -l      : Limit the duration.
-    -s      : Seek seconds before.
-    -f RATE : Framerate (Default 10). 
+    Convert input video files to GIF format. You can set the start
+    second (-s), the duration (-l) and framerate (-f)(Default 10).
 
 ## Collaborating
 
