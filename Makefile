@@ -15,6 +15,7 @@ endif
 ## -- install-sh --
 install: install-sh
 install-sh:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp bin/vid2gif bin/img2gif  $(DESTDIR)$(PREFIX)/bin
+	@mkdir -p $(DESTDIR)$(PREFIX)/bin
+	@echo 'I bin/vid2gif'   ; cp bin/vid2gif     $(DESTDIR)$(PREFIX)/bin
+	@echo 'I bin/img2gif'   ; cp bin/img2gif     $(DESTDIR)$(PREFIX)/bin
 ## -- install-sh --
